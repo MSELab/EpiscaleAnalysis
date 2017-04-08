@@ -1,0 +1,6 @@
+*.asv
+*.mex*
+*.png
+*.tif
+*.m~
+/Data/*
