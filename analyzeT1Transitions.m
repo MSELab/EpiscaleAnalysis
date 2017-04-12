@@ -20,14 +20,20 @@ end
 labels = importData(settings);
 
 %% Processes all files listed in the spreadsheet
-flag = zeros(length(labels), 1);
+flag_convert = zeros(length(labels), 1);
+flag_analyze = zeros(length(labels), 1);
+
 if coreNumber == 1
-    for k = randperm(length(labels))
-        flag(k) = extractT1Transitions(labels{k}, settings);
+    for k = 1:length(labels) %randperm(length(labels))
+        flag_convert(k) = saveSimulation(labels{k}, settings);
+        flag_analyze(k) = extractT1Transitions(labels{k}, settings);
     end
 else
     parpool(coreNumber);
     parfor k = 1:length(labels)
-        flag(k) = extractT1Transitions(labels{k}, settings);
+        flag_convert(k) = saveSimulation(labels{k}, settings);
+        flag_analyze(k) = extractT1Transitions(labels{k}, settings);
     end
 end
+
+flag = [flag_convert, flag_analyze];

@@ -39,6 +39,7 @@ tSearchEnd = min(t_gained + framesSearched, numFrames - 1);
 %% Find if cells expected to lose a neighbors do lose a neighbors
 occurs = zeros(size(t_gained), 'logical');
 t_lost = zeros(size(t_gained));
+cellsInvolved = [];
 for t = find(~mitotic)
     tmp = data.neighbors{t_gained(t)};
     toLose = intersect(tmp{[i_gained(t), j_gained(t)]});
@@ -55,6 +56,8 @@ for t = find(~mitotic)
             tSearchStart(t):tSearchEnd(t))));
         cellsInvolved(1:2,t) = [i_gained(t), j_gained(t)];
         cellsInvolved(3:4,t) = toLose;
+    else
+        cellsInvolved(1:4,t) = 0;
     end
 end
 
@@ -63,6 +66,10 @@ T1_time = mean([t_gained, t_lost], 2);
 T1_time = T1_time(occurs);
 T1_cells = cellsInvolved(:, occurs);
 cellCenters = data.cellCenters(round(T1_time));
+if isempty(cellCenters)
+    T1_positions = [];
+    T1_radius = [];
+end
 for i = length(cellCenters):-1:1
     tmp = cellCenters{i};
     T1_positions(i,:) = mean(tmp(T1_cells(:,i),1:2),1) - 25;
