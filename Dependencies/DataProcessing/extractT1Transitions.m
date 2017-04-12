@@ -7,6 +7,7 @@ end
 %% Initialization
 mpCutoff = settings.mpCutoff;
 framesSearched = settings.framesSearched;
+minSimTimeToAn = 100;
 minSimTime = 1; %settings.minSimTime;
 [data, flag] = getData(label, {'neighbors','growthProgress','cellCenters'});
 pathDatafile = strrep(settings.thruT1, '$', label);
@@ -16,6 +17,12 @@ end
 data.neighbors = data.neighbors(1:end-1);
 data.growthProgress = data.growthProgress(1:end-1);
 data.cellCenters = data.cellCenters(1:end-1);
+
+if length(data.cellCenters) < minSimTimeToAn
+    flag = -2;
+    save(pathDatafile, 'flag')
+    return
+end    
 
 %% Populate adjacency matrix
 numFrames = length(data.neighbors);
@@ -95,7 +102,7 @@ plot(frame,cumsum(T1_count))
 T1_model = fitlm(frame,cumsum(T1_count));
 
 %% Save analysis
-disp(['Saving mat T1 transition file for ' label])
+disp(['T1 Analysis: Saving mat T1 transition file for ' label])
 
 flag = 1;
 
