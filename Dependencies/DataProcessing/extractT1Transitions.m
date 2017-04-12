@@ -6,7 +6,7 @@ end
 %% Initialization
 mpCutoff = settings.mpCutoff;
 framesSearched = settings.framesSearched;
-minSimTime = settings.minSimTime;
+minSimTime = 1; %settings.minSimTime;
 [data, flag] = getData(label, {'neighbors','growthProgress','cellCenters'});
 if ~flag
     return
