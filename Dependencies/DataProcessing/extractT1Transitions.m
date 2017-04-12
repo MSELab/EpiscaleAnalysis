@@ -3,14 +3,19 @@ if nargin < 2
     settings = getSettings;
 end
 
+
 %% Initialization
 mpCutoff = settings.mpCutoff;
 framesSearched = settings.framesSearched;
 minSimTime = 1; %settings.minSimTime;
 [data, flag] = getData(label, {'neighbors','growthProgress','cellCenters'});
+pathDatafile = strrep(settings.thruT1, '$', label);
 if ~flag
     return
 end
+data.neighbors = data.neighbors(1:end-1);
+data.growthProgress = data.growthProgress(1:end-1);
+data.cellCenters = data.cellCenters(1:end-1);
 
 %% Populate adjacency matrix
 numFrames = length(data.neighbors);
@@ -25,6 +30,12 @@ duplicates = i_gained > j_gained;
 i_gained = i_gained(~duplicates);
 j_gained = j_gained(~duplicates);
 t_gained = t_gained(~duplicates);
+
+if isempty(i_gained)
+    flag = -1;
+    save(pathDatafile, 'flag')
+    return
+end
 
 for i = length(i_gained):-1:1
     CP(i,:) = data.growthProgress{t_gained(i)+1}([i_gained(i), j_gained(i)]);
@@ -84,10 +95,9 @@ plot(frame,cumsum(T1_count))
 T1_model = fitlm(frame,cumsum(T1_count));
 
 %% Save analysis
-pathDatafile = strrep(settings.thruT1, '$', label);
 disp(['Saving mat T1 transition file for ' label])
 
-save(pathDatafile, 'T1_model', 'T1_count', 'frame', 'T1_positions', ...
-    'T1_radius', 'T1_cells', 'T1_time');
-
 flag = 1;
+
+save(pathDatafile, 'T1_model', 'T1_count', 'frame', 'T1_positions', ...
+    'T1_radius', 'T1_cells', 'T1_time', 'flag');

@@ -4,3 +4,5 @@
 *.tif
 *.m~
 /Data/*
+*.vtk
+*.mat
