@@ -19,11 +19,14 @@ n = 0;
 for i = 1:length(data.neighbors)
    tmp1 = data.growthProgress{i};
    tmp2 = data.cellCenters{i};
-   if length(tmp1) >= n && length(tmp1) == length(tmp2)
-       n = length(tmp1);
+   N1 = length(tmp1);
+   N2 = length(tmp2);
+   if N1 == N2 && N1 >= n 
+       n = N1;
    else
        break
    end
+   Nmat(i) = N1;
 end
 
 data.neighbors = data.neighbors(1:i-1);
@@ -104,6 +107,10 @@ if isempty(cellCenters)
 end
 for i = length(cellCenters):-1:1
     tmp = cellCenters{i};
+    if any(T1_cells(:,i) > size(tmp, 1))
+        warning('Cell number too high')
+        continue
+    end
     T1_positions(i,:) = mean(tmp(T1_cells(:,i),1:2),1) - 25;
     T1_radius = sqrt(sum(T1_positions.^2,2));
 end
