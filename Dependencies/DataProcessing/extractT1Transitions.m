@@ -14,9 +14,21 @@ pathDatafile = strrep(settings.thruT1, '$', label);
 if ~flag
     return
 end
-data.neighbors = data.neighbors(1:end-1);
-data.growthProgress = data.growthProgress(1:end-1);
-data.cellCenters = data.cellCenters(1:end-1);
+
+n = 0;
+for i = 1:length(data.neighbors)
+   tmp1 = data.growthProgress{i};
+   tmp2 = data.cellCenters{i};
+   if length(tmp1) >= n && length(tmp1) == length(tmp2)
+       n = length(tmp1);
+   else
+       break
+   end
+end
+
+data.neighbors = data.neighbors(1:i-1);
+data.growthProgress = data.growthProgress(1:i-1);
+data.cellCenters = data.cellCenters(1:i-1);
 
 if length(data.cellCenters) < minSimTimeToAn
     flag = -2;
@@ -70,8 +82,10 @@ for t = find(~mitotic)
     end
     occurs(t) = any(adjLost(toLose(1),toLose(2),tSearchStart(t):tSearchEnd(t)));
     if occurs(t)
-        t_lost(t) = tSearchStart(t) - 1 + find(squeeze(adjLost(toLose(1),toLose(2), ...
+        t_lost_tmp = tSearchStart(t) - 1 + find(squeeze(adjLost(toLose(1),toLose(2), ...
             tSearchStart(t):tSearchEnd(t))));
+        t_lost(t) = t_lost_tmp(1);
+        warning('Two gains detected, only one counted')
         cellsInvolved(1:2,t) = [i_gained(t), j_gained(t)];
         cellsInvolved(3:4,t) = toLose;
     else
