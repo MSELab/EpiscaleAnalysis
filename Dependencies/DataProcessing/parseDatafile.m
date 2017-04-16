@@ -18,6 +18,9 @@ for j = 1:length(data)
     if ~isempty(tempString)
         colon = strfind(tempString, ':');
         field = strtrim(tempString(1:(colon-1)));
+        if isempty(field)
+            break
+        end
         values = tempString((colon+1):end);
         if strcmp(field, 'CellRank') % Indicates the start of a new cell
             cellRank = str2num(values) + 1;

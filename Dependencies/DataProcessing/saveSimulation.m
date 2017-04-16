@@ -23,6 +23,8 @@ nameStructure = strrep(list(idx).name, '00000', 'xxxxx');
 disp(['Reading raw data for ' label])
 rawDetails = convertSimulationintoMatArray([pathData, nameStructure], 0);
 
+rawDetails(end) = [];
+
 disp(['Converting raw data into mat files for ' label])
 for i = length(rawDetails):-1:1
     clear cellCenterstmp neighborstmp
