@@ -29,11 +29,12 @@ if coreNumber == 1
         flag_analyze(k) = extractT1Transitions(labels{k}, settings);
     end
 else
-    parpool(coreNumber);
+    parpool(coreNumber)
     parfor k = 1:length(labels)
         flag_convert(k) = saveSimulation(labels{k}, settings);
         flag_analyze(k) = extractT1Transitions(labels{k}, settings);
     end
+    delete(gcp('nocreate'))
 end
 
 flag = [flag_convert, flag_analyze];

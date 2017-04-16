@@ -1,9 +1,11 @@
 #!/bin/csh
 #$ -N ProcessEpiScale
 #$ -q long
-#$ -pe smp 8
+#$ -pe smp 2
+#$ -M pbrodski@nd.edu
+#$ -m bea
 
-setenv MATLABPATH /afs/crc.nd.edu/group/Zartman/Pavel/Project3Episcale/GrowthStudy
-cd /afs/crc.nd.edu/group/Zartman/Pavel/Project3Episcale/GrowthStudy
+cd /afs/crc.nd.edu/group/Zartman/Pavel/Project3Episcale/Analysis
 module load matlab/9.2
-matlab -nodisplay -nosplash -nojvm -r < "convertSimulationOutput(8)"
+MATLABPATH="/afs/crc.nd.edu/group/Zartman/Pavel/Project3Episcale/Analysis"
+matlab -nodisplay -nosplash -nojvm -r < "analyzeT1Transitions(2)"
