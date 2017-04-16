@@ -1,8 +1,15 @@
+# Temportary matlab files
 *.asv
 *.mex*
+*.m~
+*.mat
+*filepart*
+
+# Rendered images
 *.png
 *.tif
-*.m~
+
+# Data files
 /Data/*
 *.vtk
-*.mat
+*.txt

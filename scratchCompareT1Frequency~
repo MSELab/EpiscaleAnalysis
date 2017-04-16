@@ -1,3 +1,0 @@
-settings = prepareWorkspace;
-[labels ] = importData(settings);
-

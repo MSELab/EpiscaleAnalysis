@@ -1,6 +1,0 @@
-settings = prepareWorkspace;
-[labels, metadata] = importData(settings);
-
-for i = 1:length(labels)
-    
-end
