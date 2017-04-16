@@ -1,2 +1,2 @@
 # EpiscaleAnalysis
-# EpiscaleAnalysis
+A list of simulations is stored in DataIndex.xlsx. That list corresponds to the organization of directories in the /Data folder. The script file preprocessSimulations will run the matlab file analyzeT1Transitions. This results in generating a .mat file in each simulation folder with easily-accessible data for each simulation, and a .mat file with a T1 transition analysis.
