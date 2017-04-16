@@ -6,7 +6,6 @@
 % 2: Datafile already exists
 % -1: Did not find raw data
 
-<<<<<<< HEAD
 % Usage:
 % analyzeT1Transitions(coreNumber [uint8 = 1], settings [struct = getSettings],
 %    path [string = pwd], analysis [uint8 = 2])
