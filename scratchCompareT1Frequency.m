@@ -62,7 +62,11 @@ T1_trans_counted = inTimeWindow & (cellsInRange >= minCellsToCount);
 
 %% Test
 T1_times = uint16(T1_transition_time(T1_trans_counted))';
-for i = 
+frames = timeToAnalyze(1):timeToAnalyze(2);
+cumT1Trans = zeros(size(frames));
+for i = 1:length(T1_times)
+    cumT1Trans(frames > T1_times(i)) = cumT1Trans(frames > T1_times(i)) + 1;
+end
 
 for t = 1:length(T1_times)
     T1_pos(t,:) = mean(cellPos{T1_times(t)}(T1_cells(:,t),1:2),1);
@@ -88,6 +92,19 @@ scatter(T1_pos(:,1),T1_pos(:,2),'.')
 axis equal
 
 T1_count = sum(T1_trans_counted);
+
+figure(2)
+plot(frames, cumT1Trans);
+
+mdl = fitlm(frames, cumT1Trans);
+coeff = mdl.Coefficients;
+coeff = coeff(2,:);
+
+measurements.T1_transition_rate = coeff.Estimate;
+measurements.T1_transition_rate_SE = coeff.SE;
+measurements.mdl = mdl;
+
+measurements
 
 %% Make figures
 % figure(1)
