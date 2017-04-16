@@ -41,16 +41,6 @@ analysis = p.Results.analysis;
 % Prepare workspace
 cd(path);
 if isempty(settings)
-=======
-
-
-function flag = analyzeT1Transitions(coreNumber, settings)
-%% Initialization
-if nargin < 1
-    coreNumber = 1;
-end
-if nargin < 2
->>>>>>> origin/master
     settings = prepareWorkspace;
 else
     settings = prepareWorkspace(settings);
