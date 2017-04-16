@@ -1,36 +1,39 @@
-% %% Prepare workspace
-% clearvars
-% settings = prepareWorkspace;
-% [labels, metadata] = importData(settings);
-%
-% %% Load data
-% for i = 1:length(labels)
-%     if (exist(['Data' filesep labels{i} filesep 'T1Transitions.mat'], 'file'))
-%         data = load(['Data' filesep labels{i} filesep 'T1Transitions.mat']);
-%         data2 = load(['Data' filesep labels{i} filesep 'dataFile.mat']);
-%         if ~isfield(data, 'frame') || ~isfield(data, 'T1_count')
-%             flag(i) = -3;
-%         elseif length(data.frame) <= 10
-%             flag(i) = -2;
-%         else
-%             flag(i) = 1;
-%             frame{i} = data.frame;
-%             T1_count{i} = data.T1_count;
-%         end
-%     else
-%         flag(i) = -1;
-%     end
-% end
-%
-% frame = frame(flag > 0);
-% T1_count = T1_count(flag > 0);
+%% Prepare workspace
+clearvars
+settings = prepareWorkspace;
+[labels, metadata] = importData(settings);
+
+settings.firstDivision = 10;
+settings.lastDivision = 300;
+settings.cellRadius = 60;
+settings.minCellsToCount = 1;
+
+%% Load data
+for i = 1:length(labels)
+    if (exist(['Data' filesep labels{i} filesep 'T1Transitions.mat'], 'file'))
+        data = load(['Data' filesep labels{i} filesep 'T1Transitions.mat']);
+        data2 = load(['Data' filesep labels{i} filesep 'dataFile.mat']);
+        measurements(i) = compareT1Transitions(data, data2, settings);
+        if ~isfield(data, 'frame') || ~isfield(data, 'T1_count')
+            flag(i) = -3;
+        elseif length(data.frame) <= 10
+            flag(i) = -2;
+        else
+            flag(i) = 1;
+            frame{i} = data.frame;
+            T1_count{i} = data.T1_count;
+        end
+    else
+        flag(i) = -1;
+    end
+end
+
+frame = frame(flag > 0);
+T1_count = T1_count(flag > 0);
 
 %% Extract data for reproducible area and cell number
 % Declare analysis settings
-firstDivision = 50;
-lastDivision = 200;
-cellRadius = 70;
-minCellsToCount = 1;
+
 
 % Load data
 cellNumber = data2.cellNumber;
@@ -39,7 +42,9 @@ T1_transition_time = data.T1_time;
 T1_cells = data.T1_cells;
 
 % Determine which T1 transitions are to be counted
-timeToAnalyze = cellNumber(1) + [firstDivision, lastDivision];
+cellsToAnalyze = cellNumber(1) + [firstDivision, lastDivision];
+timeWindowTmp = find(cellNumber >= cellsToAnalyze(1) & cellNumber <= cellsToAnalyze(2));
+timeToAnalyze = [timeWindowTmp(1), timeWindowTmp(end)];
 T1_in_time_window = T1_transition_time >= timeToAnalyze(1) & ...
     T1_transition_time <= timeToAnalyze(2);
 
@@ -88,13 +93,15 @@ scatter(tmpCenters(:,1),tmpCenters(:,2))
 hold on
 scatter(origin(1), origin(2))
 scatter(tmpCenters(activeCells,1),tmpCenters(activeCells,2),'filled')
-scatter(T1_pos(:,1),T1_pos(:,2),'.')
+scatter(T1_pos(:,1),T1_pos(:,2),32,'filled')
 axis equal
 
 T1_count = sum(T1_trans_counted);
 
 figure(2)
 plot(frames, cumT1Trans);
+xlabel('Time (frames)')
+ylabel('T1 Transitions')
 
 mdl = fitlm(frames, cumT1Trans);
 coeff = mdl.Coefficients;
@@ -103,8 +110,30 @@ coeff = coeff(2,:);
 measurements.T1_transition_rate = coeff.Estimate;
 measurements.T1_transition_rate_SE = coeff.SE;
 measurements.mdl = mdl;
+measurements.R2 = mdl.Rsquared.Adjusted;
+measurements.frames = timeToAnalyze;
+measurements.err_ratio = coeff.Estimate / coeff.SE;
 
 measurements
+
+figure(3)
+for t = 1:length(cellNumber)
+    Ns = T1_cells(:,i)';
+    
+    tmpCenters = cellPos{t}(:,1:2);
+    origin = [mean(tmpCenters(:,1)), mean(tmpCenters(:,2))];
+    distFromOrigin = sqrt(sum((tmpCenters-origin).^2,2));
+    sortDist = sort(distFromOrigin);
+    rMaxMat(t) = sortDist(cellRadius);
+end
+plot(1:length(cellNumber), rMaxMat);
+xlabel('Frames')
+ylabel('Radius')
+
+figure(4)
+plot(cellNumber(frames), cumT1Trans);
+xlabel('Cell Number')
+ylabel('T1 Transitions')
 
 %% Make figures
 % figure(1)
