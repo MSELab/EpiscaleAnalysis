@@ -25,7 +25,7 @@ function flag = analyzeT1Transitions(varargin)
 %% Input parsing
 % Define the input parser
 p = inputParser;
-addOptional(p,'coreNumber', 1,    @(x) validateattributes(x, {'numeric'}, {{'>=',1},{'<=',12}}));
+addOptional(p,'coreNumber', 1,    @(x) validateattributes(x, {'numeric'}, {'>=',1,'<=',12}));
 addOptional(p,'path',       pwd,  @ischar);
 addOptional(p,'settings',   [],   @(x) isempty(x) || isstruct(x));
 addOptional(p,'analysis',   2,    @(x) any(x==[1,2]));
