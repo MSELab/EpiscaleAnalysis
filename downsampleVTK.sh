@@ -5,7 +5,7 @@ read -p "You are about to lose a lot of data. Are you sure? " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-	cd Data/
+	cd Data/unsorted/
 	echo "removing vtk files ending with 1"
 		find . -name "*1.vtk" -delete
 	echo "removing vtk files ending with 2"
