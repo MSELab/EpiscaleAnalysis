@@ -13,3 +13,6 @@
 /Data/*
 *.vtk
 *.txt
+
+# Data output files
+*.o*
