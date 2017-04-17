@@ -26,5 +26,5 @@ nrows = 25
 rlist = candexch(C,nrows)
 
 nfactors = 7
-nruns = 25
-[dCE,X] = cordexch(nfactors,nruns,'linear','bounds',C)
+nruns = 250
+[dCE] = cordexch(nfactors,nruns,'linear','bounds',C)
