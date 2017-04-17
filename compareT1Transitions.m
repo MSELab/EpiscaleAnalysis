@@ -19,6 +19,9 @@ timeToAnalyze = [timeWindowTmp(1), timeWindowTmp(end)];
 T1_in_time_window = T1_transition_time >= timeToAnalyze(1) & ...
     T1_transition_time <= timeToAnalyze(2);
 
+cellsInRange = zeros(1, length(T1_in_time_window));
+inTimeWindow = zeros(1, length(T1_in_time_window));
+
 for i = 1:length(T1_in_time_window)
     t = T1_transition_time(i);
     Ns = T1_cells(:,i)';
