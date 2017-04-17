@@ -1,8 +1,4 @@
 function measurements = compareT1Transitions(data, data2, settings)
-
-frame = frame(flag > 0);
-T1_count = T1_count(flag > 0);
-
 %% Extract data for reproducible area and cell number
 % Declare analysis settings
 firstDivision = settings.firstDivision;

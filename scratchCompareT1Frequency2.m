@@ -19,6 +19,7 @@ for i = 1:length(labels)
         elseif length(data.frame) <= 10
             flag(i) = -2;
         else
+            disp(['Processing: ' labels{i}])
             flag(i) = 1;
             frame{i} = data.frame;
             T1_count{i} = data.T1_count;
@@ -28,3 +29,10 @@ for i = 1:length(labels)
     end
 end
 
+%% Rearrange data
+g_ave = metadata.g_ave;
+MR = metadata.MR;
+
+g_ave = g_ave(flag > 0);
+MR = MR(flag > 0);
+measurements = measurements(flag > 0);
