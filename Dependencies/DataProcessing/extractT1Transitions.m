@@ -14,7 +14,11 @@ pathDatafile = strrep(settings.thruT1, '$', label);
 if ~flag
     return
 end
-
+if exist(pathDatafile, 'file')
+    flag = 2;
+    disp('T1 transitions already analyzed.')
+    return
+end
 n = 0;
 for i = 1:length(data.neighbors)
    tmp1 = data.growthProgress{i};
