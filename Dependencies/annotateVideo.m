@@ -24,6 +24,15 @@ settings.outAnimation = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\Data\$
 settings.thruData = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_Raw.mat';
 settings.thruT1 = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_T1.mat';
 
+
+settings.lostColor = [0,255, 255];
+settings.gainedColor = [255,0,255];
+
+T1colors(:,1) = settings.lostColor;
+T1colors(:,2) = settings.lostColor;
+T1colors(:,3) = settings.gainedColor;
+T1colors(:,4) = settings.gainedColor;
+
 %% Obtain data path
 pathAnimation = strrep(settings.thruAnimation, '$', label);
 pathAnnotation = strrep(settings.thruAnnotation, '$', label);
@@ -116,7 +125,7 @@ for t = 0:lastFrameidx
     currentTimepoint = t * settings.outputFrameRate + 1;
     
     if currentTimepoint > length(data.cellCenters)
-       break 
+        break
     end
     
     % Read in frame
@@ -126,27 +135,27 @@ for t = 0:lastFrameidx
     end
     
     disp(['Annotating ' label ' Frame ' num2str(t)]);
+    
+    % Generate frame skeleton
     frameRaw = imread(tmpPath);
-    frame = frameRaw;
+    frameLogical = frameRaw(:,:,1) == 0;
+    frameLogical = imfill(frameLogical, 'holes');
+    tissueOutline = imdilate(frameLogical, strel('disk', 20));
+    tissueOutline = imerode(tissueOutline, strel('disk', 20));
+    skeleton = bwmorph(~frameLogical,'skel',Inf);
+    skeleton(~tissueOutline) = 0;
+    skeleton(bwmorph(tissueOutline,'remove')) = 1;
+    skeleton = imdilate(skeleton, strel('disk', 1));
+    
+    frame = uint8(repmat(~skeleton, [1,1,3])) * 255;
     
     % Put neighbors on image
     cellCenters = data.cellCenters{currentTimepoint};
-        cellCentersNew = zeros(size(cellCenters), 'double');
+    cellCentersNew = zeros(size(cellCenters), 'double');
     [cellCentersNew(:,1), cellCentersNew(:,2)] = ...
         tform.transformPointsForward(cellCenters(:,1), cellCenters(:,2));
     
     neighbors = data.neighbors{currentTimepoint};
-    for i = 1:length(neighbors)
-        neighborPositions = cellCentersNew(neighbors{i},1:2);
-        allPositions = neighborPositions;
-        allPositions(:,3:4) = repmat(cellCentersNew(i,1:2), [length(neighbors{i}), 1]);
-        frame = insertShape(frame,'Line',allPositions,'Opacity',opacityCC);
-    end
-    
-    % Put cell centers on image
-    cellCentersCircles = cellCentersNew;
-    cellCentersCircles(:,3) = radiusCC;
-    frame = insertShape(frame, 'FilledCircle', cellCentersCircles,'Opacity',opacityCC);
     
     % Annotate T1 transitions
     T1Time = abs(data2.T1_time - currentTimepoint);
@@ -161,9 +170,9 @@ for t = 0:lastFrameidx
         end
         
         if  ~(any(neighbors{T1Cells(1)} == T1Cells(2)) && ...
-        	any(neighbors{T1Cells(2)} == T1Cells(3)) && ...
-          	any(neighbors{T1Cells(3)} == T1Cells(4)) && ...
-           	any(neighbors{T1Cells(4)} == T1Cells(1)))
+                any(neighbors{T1Cells(2)} == T1Cells(3)) && ...
+                any(neighbors{T1Cells(3)} == T1Cells(4)) && ...
+                any(neighbors{T1Cells(4)} == T1Cells(1)))
             continue
         end
         
@@ -178,16 +187,18 @@ for t = 0:lastFrameidx
             if isempty(currentNeighbors)
                 continue
             end
-            
-            allPositions = cellCentersNew(currentNeighbors,1:2);
-            allPositions(:,3:4) = repmat(cellCentersNew(i,1:2), [length(currentNeighbors), 1]);
-            frame = insertShape(frame,'Line',allPositions,'Color',settings.T1Color);
         end
         idx = data2.T1_cells(:,j);
-        neighborPositions = cellCentersNew(idx(idx<=size(cellCentersNew, 1)),1:2);
-        frame = insertShape(frame, 'FilledCircle', cellCentersCircles(idx(1:2),:),'Opacity',opacityCC,'Color',settings.gainedColor);
-        frame = insertShape(frame, 'FilledCircle', cellCentersCircles(idx(3:4),:),'Opacity',opacityCC,'Color',settings.lostColor);
-        frame = insertShape(frame, 'FilledCircle', [mean(neighborPositions,1), settings.T1Radius],'Color',settings.T1Color, 'Opacity',opacity(j));
+        
+        for i = 1:4
+            cc = imfill(skeleton,round(cellCentersNew(idx(i),[2,1])));
+            cc(skeleton) = 0;
+            for c = 1:3
+                tmpFrame = frame(:,:,c);
+                tmpFrame(cc) = T1colors(c, i);
+                frame(:,:,c) = tmpFrame;
+            end
+        end
     end
     
     % Write video
