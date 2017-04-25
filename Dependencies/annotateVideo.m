@@ -6,13 +6,25 @@ if nargin < 2
     settings = getSettings();
 end
 
-%% Find data
+%% Lazy parameter declaration
+refBB = settings.refBB;
+radiusCC = settings.radiusCC;
+opacityCC = settings.opacityCC;
+
+settings.annotateT1Time = 200;
+settings.T1Color = 'red';
+settings.lostColor =  'red';
+settings.gainedColor =  'cyan';
+settings.T1Opacity = 0.3;
+settings.T1Radius = 24;
+
 settings.thruAnimation = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\Data\$\pngFiles\';
 settings.thruAnnotation = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\Data\$\pngAnnotated\';
 settings.outAnimation = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\Data\$_annotated';
 settings.thruData = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_Raw.mat';
 settings.thruT1 = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_T1.mat';
 
+%% Obtain data path
 pathAnimation = strrep(settings.thruAnimation, '$', label);
 pathAnnotation = strrep(settings.thruAnnotation, '$', label);
 pathVideo = strrep(settings.outAnimation, '$', label);
@@ -56,15 +68,11 @@ switch forms(1)
         return
 end
 
-
+%% Load data
 disp(['Reading raw data for ' label])
 
 data = load(pathData, 'cellCenters', 'neighbors');
 data2 = load(pathT1, 'T1_cells', 'T1_time');
-
-refBB = settings.refBB;
-radiusCC = settings.radiusCC;
-opacityCC = settings.opacityCC;
 
 %% Obtain bounding box for last frame
 lastFrameidx = 0;
@@ -104,13 +112,6 @@ v.FrameRate = 7;
 open(v);
 
 %% Annotate frames
-settings.annotateT1Time = 200;
-settings.T1Color = 'red';
-settings.lostColor =  'red';
-settings.gainedColor =  'cyan';
-settings.T1Opacity = 0.3;
-settings.T1Radius = 24;
-    
 for t = 0:lastFrameidx
     currentTimepoint = t * settings.outputFrameRate + 1;
     
@@ -198,5 +199,3 @@ end
 close (v)
 
 flag = 1;
-
-
