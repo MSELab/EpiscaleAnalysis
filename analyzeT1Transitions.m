@@ -20,15 +20,21 @@
 %       defaults to a full analysis (2). The following are the types:
 %         1: Convert data into .mat files
 %         2: Extract T1 transition frequency (requires 1)
+% force [logical] determines whether to force recalculation of quantities.
+%         empty: Default to settings
+%         0: Do not force anything
+%         1: Force T1 transition analysis
+%         2: Force T1 transition analysis and data processing
 
 function flag = analyzeT1Transitions(varargin)
 %% Input parsing
 % Define the input parser
 p = inputParser;
-addOptional(p,'coreNumber', 1,    @(x) validateattributes(x, {'numeric'}, {'>=',1,'<=',12}));
-addOptional(p,'path',       pwd,  @ischar);
-addOptional(p,'settings',   [],   @(x) isempty(x) || isstruct(x));
-addOptional(p,'analysis',   2,    @(x) any(x==[1,2]));
+addOptional(p,'coreNumber', 1,     @(x) validateattributes(x, {'numeric'}, {'>=',1,'<=',12}));
+addOptional(p,'path',       pwd,   @ischar);
+addOptional(p,'settings',   [],    @(x) isempty(x) || isstruct(x));
+addOptional(p,'analysis',   2,     @(x) any(x==[1,2]));
+addOptional(p,'force',      [],    @(x) any(x==[0,1,2]));
 
 % Parse inputs
 parse(p,varargin{:});
@@ -44,6 +50,11 @@ if isempty(settings)
     settings = prepareWorkspace;
 else
     settings = prepareWorkspace(settings);
+end
+
+% Override force
+if ~isempty(p.Results.force)
+    settings.force = p.Results.force;
 end
 
 labels = importData(settings);

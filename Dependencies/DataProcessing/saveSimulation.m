@@ -6,7 +6,7 @@ pathData = strrep(settings.dirStats, '$', label);
 list = dir(pathData);
 idx = find(contains({list.name},'00000'));
 
-if exist(pathDatafile, 'file')
+if exist(pathDatafile, 'file')&&~(settings.force == 2)
     flag = 1;
     disp([label ' already processed.'])
     return

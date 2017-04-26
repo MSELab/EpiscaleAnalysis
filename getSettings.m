@@ -49,5 +49,7 @@ settings.T1colors(:,3) = settings.gainedColor;
 settings.T1colors(:,4) = settings.gainedColor;
 
 settings.outputFrameRate = 5;
+
+settings.force = 0;
 end
 

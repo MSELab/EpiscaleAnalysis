@@ -14,11 +14,13 @@ pathDatafile = strrep(settings.thruT1, '$', label);
 if ~flag
     return
 end
-if exist(pathDatafile, 'file')
+if exist(pathDatafile, 'file')&&~settings.force
     flag = 2;
     disp('T1 transitions already analyzed.')
     return
 end
+
+%% Obtain cell number per frame
 n = 0;
 for i = 1:length(data.neighbors)
    tmp1 = data.growthProgress{i};
@@ -53,83 +55,53 @@ end
 %% Find cells that gain a neighbor
 [i_gained, j_gained, t_gained] = ind2sub(size(adj),find((adj(:,:,2:end)-adj(:,:,1:end-1)) > 0));
 duplicates = i_gained > j_gained;
-i_gained = i_gained(~duplicates);
-j_gained = j_gained(~duplicates);
-t_gained = t_gained(~duplicates);
+toRemove = i_gained > j_gained | i_gained > Nmat(t_gained)' | j_gained > Nmat(t_gained)';
+i_gained(toRemove) = [];
+j_gained(toRemove) = [];
+t_gained(toRemove) = [];
 
-if isempty(i_gained)
-    flag = -1;
-    save(pathDatafile, 'flag')
-    return
+%% Find corresponding loser cells
+T1Cell = [];
+T1Time = [];
+
+for i = 1:length(i_gained)
+    tmp = data.neighbors{t_gained(i)};
+    toLose = intersect(tmp{[i_gained(i), j_gained(i)]});
+    if length(toLose) >= 2
+        loserCells = nchoosek(toLose,2);
+        for j = 1:size(loserCells, 1)
+            T1Cell(end+1,1:4) = [i_gained(i), j_gained(i), loserCells(j,:)];
+            T1Time(end+1) = t_gained(i);
+        end
+    end
 end
 
-for i = length(i_gained):-1:1
-    CP(i,:) = data.growthProgress{t_gained(i)+1}([i_gained(i), j_gained(i)]);
-end
-
-mitotic = any(CP' < mpCutoff(1) | CP' > mpCutoff(2));
-
+%% Verify that loser cells lost each other as neighbors
 adjLost = (adj(:,:,2:end)-adj(:,:,1:end-1)) < 0;
-tSearchStart = max(t_gained - framesSearched, 1);
-tSearchEnd = min(t_gained + framesSearched, numFrames - 1);
-
-%% Find if cells expected to lose a neighbors do lose a neighbors
-occurs = zeros(size(t_gained), 'logical');
-t_lost = zeros(size(t_gained));
-cellsInvolved = [];
-for t = find(~mitotic)
-    tmp = data.neighbors{t_gained(t)};
-    toLose = intersect(tmp{[i_gained(t), j_gained(t)]});
-    if length(toLose) < 2
-        continue
-    end
-    if length(toLose) > 2
-        toLose = toLose(1:2);
-       warning('T1 transition requires 4 cells') 
-    end
-    occurs(t) = any(adjLost(toLose(1),toLose(2),tSearchStart(t):tSearchEnd(t)));
-    if occurs(t)
-        t_lost_tmp = tSearchStart(t) - 1 + find(squeeze(adjLost(toLose(1),toLose(2), ...
-            tSearchStart(t):tSearchEnd(t))));
-        t_lost(t) = t_lost_tmp(1);
-        warning('Two gains detected, only one counted')
-        cellsInvolved(1:2,t) = [i_gained(t), j_gained(t)];
-        cellsInvolved(3:4,t) = toLose;
-    else
-        cellsInvolved(1:4,t) = 0;
-    end
+tSearchStart = max(T1Time - framesSearched, 1);
+tSearchEnd = min(T1Time + framesSearched, numFrames - 1);
+lost = zeros(size(T1Time), 'logical');
+for i = 1:length(T1Time)
+   lost(i) = any(adjLost(T1Cell(i,3),T1Cell(i,4),tSearchStart(i):tSearchEnd(i)));
 end
+T1Cell = T1Cell(lost, :);
+T1Time = T1Time(lost);
 
-%% Measure T1 transition frequency
-T1_time = mean([t_gained, t_lost], 2);
-T1_time = T1_time(occurs);
-T1_cells = cellsInvolved(:, occurs);
-cellCenters = data.cellCenters(round(T1_time));
-if isempty(cellCenters)
-    T1_positions = [];
-    T1_radius = [];
+%% Verify that none of the T1 transition cells are mitotic
+mitotic = ones(size(T1Time), 'logical');
+for i = length(T1Time):-1:1
+    CP = data.growthProgress{T1Time(i)}(T1Cell(i,:));
+    mitotic(i) = any(CP < mpCutoff(1) | CP > mpCutoff(2));
 end
-for i = length(cellCenters):-1:1
-    tmp = cellCenters{i};
-    if any(T1_cells(:,i) > size(tmp, 1))
-        warning('Cell number too high')
-        continue
-    end
-    T1_positions(i,:) = mean(tmp(T1_cells(:,i),1:2),1) - 25;
-    T1_radius = sqrt(sum(T1_positions.^2,2));
-end
-
-[T1_count,frame] = histcounts(T1_time,0:numFrames);
-frame(1:minSimTime+1) = [];
-frame = frame / 100; % convert frame to hours
-T1_count(1:minSimTime) = [];
-plot(frame,cumsum(T1_count))
-T1_model = fitlm(frame,cumsum(T1_count));
+T1Cell = T1Cell(~mitotic, :);
+T1Time = T1Time(~mitotic);
 
 %% Save analysis
 disp(['T1 Analysis: Saving mat T1 transition file for ' label])
 
 flag = 1;
 
-save(pathDatafile, 'T1_model', 'T1_count', 'frame', 'T1_positions', ...
-    'T1_radius', 'T1_cells', 'T1_time', 'flag');
+T1_cells = T1Cell;
+T1_time = T1Time;
+
+save(pathDatafile, 'T1_cells', 'T1_time', 'flag');
