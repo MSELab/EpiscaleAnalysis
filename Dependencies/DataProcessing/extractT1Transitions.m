@@ -86,8 +86,8 @@ for i = 1:length(T1Time)
     adjLostActive = adjLost(T1Cell(i,3),T1Cell(i,4),tSearchStart(i):tSearchEnd(i));
     lost = ind2sub(size(adjLostActive), find(adjLostActive)) + tSearchStart(i) - 1;
     if ~isempty(lost)
-        T1Cell2(end+length(lost),:) = T1Cell(i,:);
-        T1Time2(end+length(lost)) = mean([repmat(T1Time(i),size(lost)), lost],2);
+        T1Cell2(end+1:end+length(lost),:) = repmat(T1Cell(i,:), [length(lost), 1]);
+        T1Time2(end+1:end+length(lost)) = mean([repmat(T1Time(i),size(lost)), lost],2);
     end
 end
 T1Cell = T1Cell2;
@@ -96,8 +96,13 @@ T1Time = T1Time2;
 %% Verify that none of the T1 transition cells are mitotic
 mitotic = ones(size(T1Time), 'logical');
 for i = length(T1Time):-1:1
-    CP = data.growthProgress{T1Time(i)}(T1Cell(i,:));
-    mitotic(i) = any(CP < mpCutoff(1) | CP > mpCutoff(2));
+    time = round(min([length(data.growthProgress) T1Time(i)]));
+    if length(data.growthProgress{time}) <= max(T1Cell(i,:))
+        CP = data.growthProgress{time}(T1Cell(i,:));
+        mitotic(i) = any(CP < mpCutoff(1) | CP > mpCutoff(2));
+    else
+        mitotic(i) = true;
+    end
 end
 T1Cell = T1Cell(~mitotic, :);
 T1Time = T1Time(~mitotic);

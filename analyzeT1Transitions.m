@@ -45,6 +45,7 @@ path = p.Results.path;
 analysis = p.Results.analysis;
 
 % Prepare workspace
+delete(gcp('nocreate'))
 cd(path);
 if isempty(settings)
     settings = prepareWorkspace;
