@@ -97,7 +97,7 @@ T1Time = T1Time2;
 mitotic = ones(size(T1Time), 'logical');
 for i = length(T1Time):-1:1
     time = round(min([length(data.growthProgress) T1Time(i)]));
-    if length(data.growthProgress{time}) <= max(T1Cell(i,:))
+    if length(data.growthProgress{time}) >= max(T1Cell(i,:))
         CP = data.growthProgress{time}(T1Cell(i,:));
         mitotic(i) = any(CP < mpCutoff(1) | CP > mpCutoff(2));
     else
