@@ -87,7 +87,7 @@ for i = 1:length(T1Time)
     lost = ind2sub(size(adjLostActive), find(adjLostActive)) + tSearchStart(i) - 1;
     if ~isempty(lost)
         T1Cell2(end+length(lost),:) = T1Cell(i,:);
-        T1Time2(end+length(lost)) = mean(T1Time(i), lost);
+        T1Time2(end+length(lost)) = mean([repmat(T1Time(i),size(lost)), lost],2);
     end
 end
 T1Cell = T1Cell2;
