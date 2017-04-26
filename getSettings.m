@@ -18,7 +18,7 @@ settings.depExt = [settings.activeDir 'Dependencies' filesep];
 settings.depInt = [settings.activeDir 'Modules' filesep];
 
 % T1 transition settings
-settings.mpCutoff = [0.01, 0.99];
+settings.mpCutoff = [0.03, 0.999];
 settings.framesSearched = 10;
 settings.minSimTime = 1000;
 
