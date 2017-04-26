@@ -37,8 +37,8 @@ settings.T1Radius = 24;
 settings.thruAnimation = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\Data\$\pngFiles\';
 settings.thruAnnotation = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\Data\$\pngAnnotated\';
 settings.outAnimation = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\Data\$_annotated';
-settings.thruData = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_Raw.mat';
-settings.thruT1 = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_T1.mat';
+% settings.thruData = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_Raw.mat';
+% settings.thruT1 = 'C:\Users\Pavel\Documents\GitHub\EpiscaleAnalysis\PooledData\$_T1.mat';
 
 settings.lostColor = [0,255, 255];
 settings.gainedColor = [255,0,255];

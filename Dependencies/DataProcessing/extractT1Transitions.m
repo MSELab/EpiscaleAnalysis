@@ -80,13 +80,18 @@ end
 adjLost = (adj(:,:,2:end)-adj(:,:,1:end-1)) < 0;
 tSearchStart = max(T1Time - framesSearched, 1);
 tSearchEnd = min(T1Time + framesSearched, numFrames - 1);
-lost = zeros(size(T1Time), 'uint16');
+T1Cell2 = [];
+T1Time2 = [];
 for i = 1:length(T1Time)
-    adjLost = adjLost(T1Cell(i,3),T1Cell(i,4),tSearchStart(i):tSearchEnd(i));
-    lost(i) = ind2sub(size(adjLost), find(adjLost));
+    adjLostActive = adjLost(T1Cell(i,3),T1Cell(i,4),tSearchStart(i):tSearchEnd(i));
+    lost = ind2sub(size(adjLostActive), find(adjLostActive)) + tSearchStart(i) - 1;
+    if ~isempty(lost)
+        T1Cell2(end+length(lost),:) = T1Cell(i,:);
+        T1Time2(end+length(lost)) = mean(T1Time(i), lost);
+    end
 end
-T1Cell = T1Cell(lost>0, :);
-T1Time = mean(T1Time(lost>0), lost(lost>0));
+T1Cell = T1Cell2;
+T1Time = T1Time2;
 
 %% Verify that none of the T1 transition cells are mitotic
 mitotic = ones(size(T1Time), 'logical');
