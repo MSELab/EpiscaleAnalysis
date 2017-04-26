@@ -10,7 +10,7 @@ minCellsToCount = settings.minCellsToCount;
 cellNumber = data2.cellNumber;
 cellPos = data2.cellCenters;
 T1_transition_time = data.T1_time;
-T1_cells = data.T1_cells;
+T1_cells = data.T1_cells';
 
 % Determine which T1 transitions are to be counted
 cellsToAnalyze = cellNumber(1) + [firstDivision, lastDivision];
