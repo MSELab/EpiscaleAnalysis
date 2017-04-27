@@ -27,6 +27,7 @@ switch mode
         
         coords = round(coords);
         coords = min(coords(:,[2,1]), size(frameDouble));
+        coords = max(coords(:,[1,2]), [1,1]);
         
         idx = sub2ind(size(frameDouble), coords(:,1), coords(:,2));
         seeds(idx) = 1;

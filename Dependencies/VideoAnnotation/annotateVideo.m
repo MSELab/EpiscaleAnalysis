@@ -1,12 +1,9 @@
-function flag = annotateVideo(label, mode, settings)
+function flag = annotateVideo(label, settings)
 settings.outputFrameRate = 5;
 
 %% Initialization
 if nargin < 2
-   mode = 1; 
-end
-if nargin < 3
-    settings = getSettings();
+   settings = getSettings(); 
 end
 
 %% Obtain data path.
@@ -64,12 +61,12 @@ for t = 0:lastFrameidx
     [cellCentersNew(:,1), cellCentersNew(:,2)] = ...
         tform.transformPointsForward(cellCenters(:,1), cellCenters(:,2));
     neighbors = data.neighbors{currentTimepoint};
-    T1Time = abs(data2.T1_time - currentTimepoint);
+    T1Time = abs(data2.T1_time' - currentTimepoint);
     opacity = (settings.annotateT1Time - T1Time) / settings.annotateT1Time * settings.T1Opacity;
     opacity(opacity < 0) = 0;
     
     % Annotate frame
-    frame = annotateFrame(frameRaw, cellCentersNew, neighbors, opacity, data2.T1_cells, settings);
+    frame = annotateFrame(frameRaw, cellCentersNew, neighbors, opacity, data2.T1_cells', settings);
     
     % Write video
     frame = imcrop(frame, stats.BoundingBox);
